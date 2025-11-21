@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Puki - Juegos Web Premium</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Montserrat', sans-serif; background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #16213e 100%); color: #e0e0e0; overflow-x: hidden; min-height: 100vh; touch-action: auto; -webkit-overflow-scrolling: touch; }
+
+        @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes glow { 0%, 100% { box-shadow: 0 0 20px rgba(100, 200, 255, 0.3); } 50% { box-shadow: 0 0 40px rgba(100, 200, 255, 0.6); } }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.7; } }
+        @keyframes float { 0%, 100% { transform: translateY(0px) rotate(-5deg); } 50% { transform: translateY(-20px) rotate(5deg); } }
+        @keyframes unlockGlow { 0% { box-shadow: 0 0 0 rgba(255, 215, 0, 0); } 100% { box-shadow: 0 0 30px rgba(255, 215, 0, 0.8); } }
+
+        html, body { scroll-behavior: smooth; }
+
+        .mascota { position: fixed; width: 100px; height: 120px; bottom: 30px; right: 30px; z-index: 999; cursor: grab; animation: float 4s ease-in-out infinite; user-select: none; touch-action: none; }
+        .mascota-cuerpo { width: 100%; height: 100%; background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%); border-radius: 50%; position: relative; box-shadow: 0 10px 30px rgba(255, 107, 157, 0.4); display: flex; align-items: center; justify-content: center; }
+        .mascota-texto { position: absolute; top: -50px; left: 50%; transform: translateX(-50%); background: rgba(100, 200, 255, 0.9); color: white; padding: 8px 15px; border-radius: 15px; font-size: 0.85em; font-weight: 600; white-space: nowrap; opacity: 0; animation: fadeInUp 0.3s ease forwards; backdrop-filter: blur(10px); }
+
+        .hero { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 50%, #7e57c2 100%); padding: 80px 30px; text-align: center; position: relative; overflow: hidden; border-bottom: 2px solid rgba(126, 87, 194, 0.3); }
+        .hero-content { position: relative; z-index: 1; animation: fadeInDown 1s ease-out; }
+        h1 { font-family: 'Playfair Display', serif; font-size: 3.5em; font-weight: 900; color: #ffffff; text-shadow: 2px 2px 20px rgba(0, 0, 0, 0.4); margin-bottom: 15px; letter-spacing: -1px; }
+        .subtitle { font-size: 1.3em; color: rgba(255, 255, 255, 0.85); font-weight: 300; letter-spacing: 1px; }
+
+        .contenedor { display: grid; grid-template-columns: 1fr; gap: 35px; margin: 60px auto; max-width: 400px; padding: 0 20px; }
+        .juego { background: linear-gradient(135deg, rgba(42, 82, 152, 0.2) 0%, rgba(126, 87, 194, 0.1) 100%); backdrop-filter: blur(20px); border: 1px solid rgba(100, 200, 255, 0.2); border-radius: 20px; overflow: hidden; transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); position: relative; cursor: pointer; animation: fadeInUp 0.6s ease-out both; }
+        .juego:nth-child(1) { animation-delay: 0.1s; }
+        .juego:nth-child(2) { animation-delay: 0.2s; }
+        .juego:nth-child(3) { animation-delay: 0.3s; }
+        .juego:nth-child(4) { animation-delay: 0.4s; }
+        .juego:nth-child(5) { animation-delay: 0.5s; }
+        .juego:hover { transform: translateY(-5px); border-color: rgba(126, 87, 194, 0.6); box-shadow: 0 20px 60px rgba(126, 87, 194, 0.3); }
+        .imagen-juego { width: 100%; height: 200px; object-fit: cover; transition: transform 0.4s ease; }
+        .juego:hover .imagen-juego { transform: scale(1.1); }
+        .contenido-juego { padding: 30px; }
+        h2 { font-family: 'Playfair Display', serif; color: #ffffff; font-size: 1.8em; margin-bottom: 12px; font-weight: 700; letter-spacing: -0.5px; }
+        p { font-size: 1em; color: rgba(224, 224, 224, 0.8); line-height: 1.8; margin-bottom: 20px; font-weight: 300; }
+        .btn-jugar { background: linear-gradient(135deg, #64c8ff 0%, #2a5298 100%); padding: 12px 28px; border-radius: 25px; color: #fff; text-decoration: none; border: none; cursor: pointer; transition: all 0.3s ease; font-weight: 600; font-size: 0.95em; display: inline-block; position: relative; z-index: 10; box-shadow: 0 8px 20px rgba(100, 200, 255, 0.2); }
+        .btn-jugar:hover { transform: scale(1.05); box-shadow: 0 12px 30px rgba(100, 200, 255, 0.4); }
+
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(5px); z-index: 2000; align-items: center; justify-content: center; animation: fadeInUp 0.3s ease-out; }
+        .modal-content { background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); border: 1px solid rgba(100, 200, 255, 0.3); padding: 40px; border-radius: 25px; max-width: 500px; box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5); animation: slideIn 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); text-align: center; }
+        .modal-close { position: absolute; top: 20px; right: 20px; font-size: 2em; color: #64c8ff; cursor: pointer; transition: transform 0.2s ease; background: none; border: none; }
+        .modal-close:hover { transform: rotate(90deg); }
+        #modal-titulo { color: #ffffff; font-size: 2em; margin-bottom: 15px; font-family: 'Playfair Display', serif; }
+        #modal-descripcion { color: rgba(224, 224, 224, 0.9); margin-bottom: 30px; line-height: 1.8; }
+
+        .desbloqueado { animation: unlockGlow 1.5s ease-in-out; border: 2px solid gold; }
+        .btn-desbloqueado { background: linear-gradient(135deg, #ffd700, #ffaa00); color: #000; font-weight: 700; }
+
+        .juego-container { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, #1a1a2e 0%, #0f0f1e 100%); z-index: 3000; }
+        .juego-canvas { width: 100%; height: 100%; display: block; }
+        .juego-ui { position: absolute; top: 20px; width: 100%; display: flex; justify-content: space-around; padding: 0 20px; z-index: 3001; }
+        .barra-vida-container { background: rgba(0, 0, 0, 0.5); padding: 10px 20px; border-radius: 15px; backdrop-filter: blur(10px); }
+        .barra-vida-label { color: white; font-size: 0.9em; margin-bottom: 5px; font-weight: 600; }
+        .barra-vida { width: 200px; height: 20px; background: rgba(255, 255, 255, 0.2); border-radius: 10px; overflow: hidden; border: 2px solid rgba(255, 255, 255, 0.3); }
+        .barra-vida-relleno { height: 100%; background: linear-gradient(90deg, #00ff88, #00cc66); transition: width 0.3s ease; border-radius: 8px; }
+        .barra-vida-relleno.enemigo { background: linear-gradient(90deg, #ff6b9d, #c44569); }
+        .juego-over { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%); padding: 40px; border-radius: 25px; text-align: center; z-index: 3002; border: 2px solid rgba(100, 200, 255, 0.3); }
+        .juego-over h2 { color: #ffffff; font-size: 2.5em; margin-bottom: 20px; }
+        .juego-over p { color: rgba(255, 255, 255, 0.8); font-size: 1.2em; margin-bottom: 30px; }
+        .btn-reiniciar, .btn-salir { padding: 12px 30px; border-radius: 20px; border: none; cursor: pointer; font-weight: 600; font-size: 1em; margin: 0 10px; transition: all 0.3s ease; }
+        .btn-reiniciar { background: linear-gradient(135deg, #00ff88, #00cc66); color: white; }
+        .btn-salir { background: linear-gradient(135deg, #ff6b9d, #c44569); color: white; }
+        .btn-reiniciar:hover, .btn-salir:hover { transform: scale(1.05); }
+        .controles-juego { position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0, 0, 0, 0.5); padding: 10px 20px; border-radius: 15px; backdrop-filter: blur(10px); color: #64c8ff; font-size: 0.9em; z-index: 3001; }
+
+        .btn-juego-minijuego { position: fixed; bottom: 20px; left: 20px; width: 60px; height: 60px; background: linear-gradient(135deg, #ff6b9d 0%, #c44569 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: 0 8px 20px rgba(255, 107, 157, 0.4); transition: all 0.3s ease; z-index: 1000; border: 3px solid rgba(255, 255, 255, 0.3); }
+        .btn-juego-minijuego:hover { transform: scale(1.1); box-shadow: 0 12px 30px rgba(255, 107, 157, 0.6); }
+
+        .controles-tactiles { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: none; z-index: 3003; width: 200px; height: 200px; }
+        .d-pad { position: relative; width: 100%; height: 100%; }
+        .d-button { position: absolute; width: 60px; height: 60px; background: rgba(100, 200, 255, 0.3); border: 2px solid rgba(100, 200, 255, 0.6); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; cursor: pointer; user-select: none; -webkit-tap-highlight-color: transparent; }
+        .d-up { top: 0; left: 50%; transform: translateX(-50%); }
+        .d-down { bottom: 0; left: 50%; transform: translateX(-50%); }
+        .d-left { left: 0; top: 50%; transform: translateY(-50%); }
+        .d-right { right: 0; top: 50%; transform: translateY(-50%); }
+        .d-fire { bottom: 0; right: 0; transform: none; background: rgba(0, 255, 136, 0.3); border-color: rgba(0, 255, 136, 0.6); }
+        .d-button:active { background: rgba(100, 200, 255, 0.6); transform: scale(0.95); }
+        .d-fire:active { background: rgba(0, 255, 136, 0.6); }
+
+        footer { margin-top: 80px; padding: 40px 30px; text-align: center; color: rgba(224, 224, 224, 0.6); border-top: 1px solid rgba(100, 200, 255, 0.1); font-size: 0.95em; }
+
+        @keyframes blink {
+            0%, 90%, 100% { opacity: 1; }
+            95% { opacity: 0; }
+        }
+        .pupila, .brillo {
+            animation: blink 3s infinite;
+        }
+    </style>
+</head>
+<body>
+    <!-- MASCOTA -->
+    <div class="mascota" id="mascota" onmousedown="iniciarArrastre(event)" ontouchstart="iniciarArrastre(event)">
+        <svg width="100" height="120" viewBox="0 0 100 120" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 8px 25px rgba(255, 107, 157, 0.4);">
+            <ellipse cx="50" cy="70" rx="40" ry="45" fill="#D4A574" stroke="#3a2a1a" stroke-width="3"/>
+            <circle cx="30" cy="45" r="14" fill="white" stroke="#3a2a1a" stroke-width="2"/>
+            <circle class="pupila" cx="30" cy="45" r="10" fill="black"/>
+            <circle class="brillo" cx="32" cy="42" r="3.5" fill="white"/>
+            <circle cx="28" cy="48" r="1.5" fill="white"/>
+            <circle cx="70" cy="45" r="14" fill="white" stroke="#3a2a1a" stroke-width="2"/>
+            <circle class="pupila" cx="70" cy="45" r="10" fill="black"/>
+            <circle class="brillo" cx="72" cy="42" r="3.5" fill="white"/>
+            <circle cx="68" cy="48" r="1.5" fill="white"/>
+            <line x1="35" y1="65" x2="65" y2="65" stroke="#3a2a1a" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <div class="mascota-texto" id="mascota-texto"></div>
+        <div class="chat-bubble" id="chat-bubble" style="display: none;">
+            <input type="text" id="chat-input" placeholder="Escribe algo..." class="chat-input">
+            <button class="chat-send" onclick="enviarMensaje()">📤</button>
+        </div>
+    </div>
+
+    <!-- BOTÓN DE MINI-JUEGO -->
+    <div class="btn-juego-minijuego" onclick="iniciarMinijuego()">
+        <svg viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+            <path d="M21 16v-2l-8-5V3.5c0-.83-.67-1.5-1.5-1.5S10 2.67 10 3.5V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+        </svg>
+    </div>
+
+    <!-- HERO -->
+    <div class="hero" id="hero-section">
+        <div class="hero-content" onclick="detectarEasterEgg(event)">
+            <h1>Puki</h1>
+            <p class="subtitle">Juega 2 rondas del avioncito para desbloquear juegos secretos</p>
+        </div>
+    </div>
+
+    <!-- CONTENEDOR DE JUEGOS -->
+    <div id="contenedor" class="contenedor"></div>
+
+    <!-- MODAL -->
+    <div id="modal" class="modal">
+        <button class="modal-close" onclick="cerrarModal()">&times;</button>
+        <div class="modal-content">
+            <img id="modal-imagen" class="modal-imagen" src="" alt="Juego">
+            <h2 id="modal-titulo"></h2>
+            <p id="modal-descripcion"></p>
+            <div id="contenido-botones" class="botones-modal">
+                <button class="btn-descargar" onclick="descargarJuego()">Descargar</button>
+                <button class="btn-cancelar" onclick="cerrarModal()">Cancelar</button>
+            </div>
+            <div id="descarga-container" class="descarga-container">
+                <div class="barra-progreso"><div class="barra-relleno"></div></div>
+                <p class="texto-descarga" id="texto-descarga">Descargando... 0%</p>
+                <button class="btn-jugar-ahora" onclick="irAJugar()">⚡ ¡Ir a Jugar!</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MINI-JUEGO -->
+    <div class="juego-container" id="juego-container">
+        <canvas class="juego-canvas" id="juego-canvas"></canvas>
+        <div class="juego-ui">
+            <div class="barra-vida-container">
+                <div class="barra-vida-label">Tu Vida</div>
+                <div class="barra-vida"><div class="barra-vida-relleno" id="vida-jugador" style="width: 100%;"></div></div>
+            </div>
+            <div class="barra-vida-container">
+                <div class="barra-vida-label">Vida Enemigo</div>
+                <div class="barra-vida"><div class="barra-vida-relleno enemigo" id="vida-enemigo" style="width: 100%;"></div></div>
+            </div>
+        </div>
+        <div class="controles-juego">Usa flechas para moverte y ESPACIO para disparar</div>
+        <div class="juego-over" id="juego-over">
+            <h2 id="resultado-titulo">¡Victoria!</h2>
+            <p id="resultado-mensaje">Has derrotado al enemigo. ¡Eres el campeón!</p>
+            <div>
+                <button class="btn-reiniciar" onclick="reiniciarJuego()">Reiniciar</button>
+                <button class="btn-salir" onclick="salirJuego()">Salir</button>
+            </div>
+        </div>
+        <!-- Pad táctil -->
+        <div class="controles-tactiles" id="controles-tactiles">
+            <div class="d-pad">
+                <div class="d-button d-up" ontouchstart="moverJugador('up')" ontouchend="detenerMovimiento()" onclick="moverJugador('up')">↑</div>
+                <div class="d-button d-down" ontouchstart="moverJugador('down')" ontouchend="detenerMovimiento()" onclick="moverJugador('down')">↓</div>
+                <div class="d-button d-left" ontouchstart="moverJugador('left')" ontouchend="detenerMovimiento()" onclick="moverJugador('left')">←</div>
+                <div class="d-button d-right" ontouchstart="moverJugador('right')" ontouchend="detenerMovimiento()" onclick="moverJugador('right')">→</div>
+                <div class="d-button d-fire" ontouchstart="disparar()" onclick="disparar()">A</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer>
+        <p>&copy; 2025 Puki - Juegos Web Premium. Todos los derechos reservados.</p>
+    </footer>
+
+    <script>
+        /* ----------  DESBLOQUEOS  ---------- */
+        localStorage.removeItem('rondasJugadas');
+        localStorage.removeItem('juegosDesbloqueados');
+        let rondasJugadas = 0;
+        let juegosDesbloqueados = [];
+
+        const juegosBase = [
+            { nombre: 'Stickman Crazy Box', descripcion: 'Una caja loca con stickman. ¡Acción sin fin!', enlace: 'https://poki.com/es/g/stickman-crazy-box', imagen: 'https://img.tapimg.net/market/images/53963d75b82396f595ae02a513461982.png?imageView2/2/w=500&h=300&fit=crop', gratis: true },
+            { nombre: 'Subway Surfers', descripcion: 'Corre sin parar por las vías del tren.', enlace: 'https://poki.com/es/g/subway-surfers', imagen: 'https://i.pinimg.com/564x/ce/c5/f1/cec5f1cadd86c2d7f7297ae74887e351.jpg', gratis: true },
+            { nombre: 'MR RACER - Car Racing', descripcion: 'Carreras callejeras a máxima velocidad.', enlace: 'https://poki.com/es/g/mr-racer-car-racing', imagen: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcT0ooaiJkjHkoxErDNBWsnb4prDeJQjk38VLA&s', gratis: true },
+            { nombre: 'Combat Online 2', descripcion: 'Batallas multijugador en tiempo real.', enlace: 'https://poki.com/es/g/combat-online-2', imagen: 'https://tse1.mm.bing.net/th/id/OIP.RCYX3bB-nof64XnfOjTy8QHaHa?rs=1&pid=ImgDetMain&o=7&rm=3', gratis: false },
+            { nombre: 'Fantasy Sandbox', descripcion: 'Crea y explora mundos de fantasía.', enlace: 'https://poki.com/es/g/fantasy-sandbox', imagen: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTcvdA9_GDzXqr_1jzA5DUCDml0BwUvU85zwg&s', gratis: false }
+        ];
+
+        /* ----------  MINI-JUEGO  ---------- */
+        let canvas, ctx, jugador, enemigo, disparos = [], enemigosDisparos = [], vidasJugador = 100, vidasEnemigo = 100;
+        let juegoActivo = false, juegoInterval, ultDisparo = 0, movimientoActivo = null;
+        const esDispositivoTactil = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+
+        function iniciarMinijuego() {
+            canvas = document.getElementById('juego-canvas');
+            ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            jugador = { x: canvas.width / 2 - 30, y: canvas.height - 120, width: 60, height: 80, speed: 5 };
+            enemigo = { x: canvas.width / 2 - 30, y: 50, width: 60, height: 80, speed: 2, direction: 1 };
+            disparos = []; enemigosDisparos = []; vidasJugador = 100; vidasEnemigo = 100;
+            juegoActivo = true; movimientoActivo = null;
+            document.getElementById('vida-jugador').style.width = vidasJugador + '%';
+            document.getElementById('vida-enemigo').style.width = vidasEnemigo + '%';
+            document.getElementById('juego-container').style.display = 'block';
+            document.getElementById('juego-over').style.display = 'none';
+
+            if (esDispositivoTactil) {
+                document.getElementById('controles-tactiles').style.display = 'block';
+            }
+
+            if (juegoInterval) clearInterval(juegoInterval);
+            juegoInterval = setInterval(bucleJuego, 1000/60);
+        }
+
+        function bucleJuego() {
+            if (!juegoActivo) return;
+            if (keys['ArrowLeft'] && jugador.x > 0) jugador.x -= jugador.speed;
+            if (keys['ArrowRight'] && jugador.x < canvas.width - jugador.width) jugador.x += jugador.speed;
+            if (keys['ArrowUp'] && jugador.y > canvas.height/2) jugador.y -= jugador.speed;
+            if (keys['ArrowDown'] && jugador.y < canvas.height - jugador.height) jugador.y += jugador.speed;
+            if (keys[' '] && Date.now() - ultDisparo > 300) disparar();
+            if (movimientoActivo === 'left' && jugador.x > 0) jugador.x -= jugador.speed;
+            if (movimientoActivo === 'right' && jugador.x < canvas.width - jugador.width) jugador.x += jugador.speed;
+            if (movimientoActivo === 'up' && jugador.y > canvas.height/2) jugador.y -= jugador.speed;
+            if (movimientoActivo === 'down' && jugador.y < canvas.height - jugador.height) jugador.y += jugador.speed;
+
+            enemigo.x += enemigo.speed * enemigo.direction;
+            if (enemigo.x <= 0 || enemigo.x >= canvas.width - enemigo.width) enemigo.direction *= -1;
+            if (Math.random() < 0.02) enemigosDisparos.push({ x: enemigo.x + enemigo.width/2 - 5, y: enemigo.y + enemigo.height, width: 10, height: 20, speed: 5 });
+
+            for (let i = disparos.length - 1; i >= 0; i--) {
+                disparos[i].y -= disparos[i].speed;
+                if (disparos[i].y < enemigo.y + enemigo.height && disparos[i].y + disparos[i].height > enemigo.y && disparos[i].x < enemigo.x + enemigo.width && disparos[i].x + disparos[i].width > enemigo.x) {
+                    vidasEnemigo -= 10; document.getElementById('vida-enemigo').style.width = vidasEnemigo + '%'; disparos.splice(i, 1);
+                    if (vidasEnemigo <= 0) { finalizarJuego(true); return; }
+                } else if (disparos[i].y < 0) disparos.splice(i, 1);
+            }
+            for (let i = enemigosDisparos.length - 1; i >= 0; i--) {
+                enemigosDisparos[i].y += enemigosDisparos[i].speed;
+                if (enemigosDisparos[i].y < jugador.y + jugador.height && enemigosDisparos[i].y + enemigosDisparos[i].height > jugador.y && enemigosDisparos[i].x < jugador.x + jugador.width && enemigosDisparos[i].x + enemigosDisparos[i].width > jugador.x) {
+                    vidasJugador -= 10; document.getElementById('vida-jugador').style.width = vidasJugador + '%'; enemigosDisparos.splice(i, 1);
+                    if (vidasJugador <= 0) { finalizarJuego(false); return; }
+                } else if (enemigosDisparos[i].y > canvas.height) enemigosDisparos.splice(i, 1);
+            }
+            dibujar();
+        }
+
+        function dibujar() {
+            if (!juegoActivo) return;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#0f0f1e'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#D4A574'; ctx.beginPath(); ctx.ellipse(jugador.x + jugador.width/2, jugador.y + jugador.height - 15, 25, 30, 0, 0, 2 * Math.PI); ctx.fill(); ctx.strokeStyle = '#3a2a1a'; ctx.lineWidth = 3; ctx.stroke();
+            ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(jugador.x + 20, jugador.y + 25, 10, 0, 2 * Math.PI); ctx.arc(jugador.x + 40, jugador.y + 25, 10, 0, 2 * Math.PI); ctx.fill();
+            ctx.fillStyle = 'black'; ctx.beginPath(); ctx.arc(jugador.x + 20, jugador.y + 25, 6, 0, 2 * Math.PI); ctx.arc(jugador.x + 40, jugador.y + 25, 6, 0, 2 * Math.PI); ctx.fill();
+            ctx.fillStyle = '#ff6b9d'; ctx.beginPath(); ctx.ellipse(enemigo.x + enemigo.width/2, enemigo.y + enemigo.height - 15, 25, 30, 0, 0, 2 * Math.PI); ctx.fill(); ctx.strokeStyle = '#c44569'; ctx.lineWidth = 3; ctx.stroke();
+            ctx.fillStyle = 'white'; ctx.beginPath(); ctx.arc(enemigo.x + 20, enemigo.y + 25, 10, 0, 2 * Math.PI); ctx.arc(enemigo.x + 40, enemigo.y + 25, 10, 0, 2 * Math.PI); ctx.fill();
+            ctx.fillStyle = 'red'; ctx.beginPath(); ctx.arc(enemigo.x + 20, enemigo.y + 25, 6, 0, 2 * Math.PI); ctx.arc(enemigo.x + 40, enemigo.y + 25, 6, 0, 2 * Math.PI); ctx.fill();
+            ctx.fillStyle = '#00ff88'; disparos.forEach(d => ctx.fillRect(d.x, d.y, d.width, d.height));
+            ctx.fillStyle = '#ff6b9d'; enemigosDisparos.forEach(d => ctx.fillRect(d.x, d.y, d.width, d.height));
+        }
+
+        function disparar() {
+            if (Date.now() - ultDisparo > 300) {
+                disparos.push({ x: jugador.x + jugador.width/2 - 5, y: jugador.y, width: 10, height: 20, speed: 7 });
+                ultDisparo = Date.now();
+            }
+        }
+        function moverJugador(d) { movimientoActivo = d; }
+        function detenerMovimiento() { movimientoActivo = null; }
+
+        function finalizarJuego(ganador) {
+            juegoActivo = false; clearInterval(juegoInterval);
+            rondasJugadas++;
+            localStorage.setItem('rondasJugadas', rondasJugadas);
+            const juegoOver = document.getElementById('juego-over');
+            const titulo = document.getElementById('resultado-titulo');
+            const parrafo = document.getElementById('resultado-mensaje');
+            titulo.textContent = ganador ? '¡Victoria!' : '¡Derrota!';
+            parrafo.textContent = ganador
+                ? `Rondas jugadas: ${rondasJugadas}. ${rondasJugadas >= 2 ? '¡Desbloqueaste los juegos premium!' : 'Juega otra ronda para desbloquear más.'}`
+                : 'Inténtalo de nuevo. Cada ronda cuenta.';
+            if (ganador && rondasJugadas === 2) desbloquearJuegos();
+            juegoOver.style.display = 'block';
+        }
+
+        function reiniciarJuego() {
+            localStorage.removeItem('rondasJugadas');
+            localStorage.removeItem('juegosDesbloqueados');
+            rondasJugadas = 0;
+            juegosDesbloqueados = [];
+            generarJuegos();
+            iniciarMinijuego();
+        }
+
+        function salirJuego() {
+            juegoActivo = false; clearInterval(juegoInterval);
+            document.getElementById('juego-container').style.display = 'none';
+            document.getElementById('controles-tactiles').style.display = 'none';
+        }
+
+        function desbloquearJuegos() {
+            juegosDesbloqueados = juegosBase.filter(j => !j.gratis).map(j => j.nombre);
+            localStorage.setItem('juegosDesbloqueados', JSON.stringify(juegosDesbloqueados));
+            mostrarTextoMascota('🎉 ¡Desbloqueaste los juegos premium! Revisa abajo.');
+            generarJuegos();
+        }
+
+        function generarJuegos() {
+            const contenedor = document.getElementById('contenedor');
+            contenedor.innerHTML = '';
+            juegosBase.forEach((juego, index) => {
+                const bloqueado = !juego.gratis && rondasJugadas < 2;
+                const divJuego = crearTarjetaJuego(juego, index, bloqueado);
+                contenedor.appendChild(divJuego);
+            });
+        }
+
+        function crearTarjetaJuego(juego, index, bloqueado) {
+            const divJuego = document.createElement('div');
+            divJuego.className = 'juego';
+            if (!bloqueado && !juego.gratis) divJuego.classList.add('desbloqueado');
+            divJuego.style.animationDelay = `${index * 0.1}s`;
+            const btnVisible = juego.gratis || !bloqueado;
+            divJuego.innerHTML = `
+                <img src="${juego.imagen}" alt="${juego.nombre}" class="imagen-juego">
+                <div class="contenido-juego">
+                    <h2>${juego.nombre} ${bloqueado ? '🔒' : '✨'}</h2>
+                    <p>${juego.descripcion}</p>
+                    <button class="btn-jugar ${btnVisible ? '' : 'btn-deshabilitado'}" 
+                            onclick="${btnVisible ? `abrirModal('${juego.nombre}', '${juego.descripcion}', '', '${juego.enlace}', '${juego.imagen}')` : ''}">
+                        ${btnVisible ? 'Jugar Ahora' : 'Juega 2 rondas para desbloquear'}
+                    </button>
+                </div>
+            `;
+            return divJuego;
+        }
+
+        function abrirModal(titulo, descripcion, paquete, enlace, imagen) {
+            juegoActual = { titulo, descripcion, paquete, enlace, imagen };
+            document.getElementById('modal-titulo').innerText = titulo;
+            document.getElementById('modal-descripcion').innerText = descripcion;
+            document.getElementById('modal-imagen').src = imagen;
+            document.getElementById('contenido-botones').style.display = 'flex';
+            document.getElementById('descarga-container').classList.remove('visible');
+            document.getElementById('modal').style.display = 'flex';
+        }
+
+        function cerrarModal() {
+            document.getElementById('modal').style.display = 'none';
+            juegoActual = null;
+        }
+
+        function descargarJuego() {
+            if (!juegoActual) return;
+            document.getElementById('contenido-botones').style.display = 'none';
+            document.getElementById('descarga-container').classList.add('visible');
+            let progreso = 0;
+            const intervalo = setInterval(() => {
+                progreso += Math.random() * 35;
+                if (progreso > 100) progreso = 100;
+                document.getElementById('texto-descarga').innerText = `Descargando... ${Math.floor(progreso)}%`;
+                if (progreso >= 100) {
+                    clearInterval(intervalo);
+                    document.getElementById('texto-descarga').innerText = '¡Descarga completada!';
+                }
+            }, 300);
+        }
+
+        function irAJugar() {
+            if (juegoActual) {
+                window.open(juegoActual.enlace, '_blank');
+                setTimeout(() => cerrarModal(), 500);
+            }
+        }
+
+        function mostrarTextoMascota(texto = null) {
+            const mascotaTexto = document.getElementById('mascota-texto');
+            const mensaje = texto || mensajosIniciales[Math.floor(Math.random() * mensajosIniciales.length)];
+            mascotaTexto.textContent = mensaje;
+            mascotaTexto.style.opacity = '1';
+            setTimeout(() => mascotaTexto.style.opacity = '0', 4000);
+        }
+
+        function abrirChat() {
+            const chatBubble = document.getElementById('chat-bubble');
+            chatBubble.style.display = chatBubble.style.display === 'none' ? 'flex' : 'none';
+            if (chatBubble.style.display === 'flex') document.getElementById('chat-input').focus();
+        }
+
+        function enviarMensaje() {
+            const input = document.getElementById('chat-input');
+            const mensaje = input.value.trim();
+            if (mensaje === '') return;
+            const respuesta = obtenerRespuesta(mensaje);
+            mostrarTextoMascota(respuesta);
+            input.value = '';
+            setTimeout(() => document.getElementById('chat-bubble').style.display = 'none', 4000);
+        }
+
+        function obtenerRespuesta(mensaje) {
+            const mensajeLower = mensaje.toLowerCase().trim();
+            for (let palabra in respuestasMascota) {
+                if (mensajeLower.includes(palabra)) {
+                    const respuestas = respuestasMascota[palabra];
+                    return respuestas[Math.floor(Math.random() * respuestas.length)];
+                }
+            }
+            const respuestasDefault = respuestasMascota['default'];
+            return respuestasDefault[Math.floor(Math.random() * respuestasDefault.length)];
+        }
+
+        let arrastrando = false, offsetX = 0, offsetY = 0;
+        function iniciarArrastre(e) {
+            arrastrando = true;
+            const mascota = document.getElementById('mascota');
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            offsetX = clientX - mascota.offsetLeft;
+            offsetY = clientY - mascota.offsetTop;
+            document.addEventListener('mousemove', arrastrarMascota);
+            document.addEventListener('touchmove', arrastrarMascota, { passive: false });
+            document.addEventListener('mouseup', detenerArrastre);
+            document.addEventListener('touchend', detenerArrastre);
+        }
+        function arrastrarMascota(e) {
+            if (!arrastrando) return;
+            e.preventDefault();
+            const mascota = document.getElementById('mascota');
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            let x = clientX - offsetX;
+            let y = clientY - offsetY;
+            x = Math.max(0, Math.min(x, window.innerWidth - 100));
+            y = Math.max(0, Math.min(y, window.innerHeight - 120));
+            mascota.style.left = x + 'px';
+            mascota.style.right = 'auto';
+            mascota.style.bottom = 'auto';
+            mascota.style.top = y + 'px';
+        }
+        function detenerArrastre() {
+            arrastrando = false;
+            document.removeEventListener('mousemove', arrastrarMascota);
+            document.removeEventListener('touchmove', arrastrarMascota);
+            document.removeEventListener('mouseup', detenerArrastre);
+            document.removeEventListener('touchend', detenerArrastre);
+        }
+        document.getElementById('mascota').addEventListener('click', function(e) {
+            if (!arrastrando) abrirChat();
+        });
+
+        let contadorClicksVirox = 0;
+        let ultimoClickVirox = 0;
+        function detectarEasterEgg(event) {
+            const ahora = Date.now();
+            if (ahora - ultimoClickVirox > 2000) contadorClicksVirox = 0;
+            contadorClicksVirox++;
+            ultimoClickVirox = ahora;
+            if (contadorClicksVirox === 5) {
+                contadorClicksVirox = 0;
+                mostrarTextoMascota('🎮 ¡EASTER EGG ACTIVADO! Modo oculto desbloqueado.');
+            }
+        }
+
+        window.onload = () => {
+            generarJuegos();
+            mostrarTextoMascota();
+        };
+
+        window.addEventListener('resize', () => {
+            if (canvas) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        });
+
+        const respuestasMascota = {
+            'hola': ['¡Hola amiguito! 👋', '¿Qué tal? 😊', '¡Hola! Me alegra verte 💜'],
+            'cómo estás': ['¡Muy bien, gracias! 😄', 'Excelente, ¿y tú? 🌟', '¡Super! Jugando contigo 🎮'],
+            'juego': ['¡Claro! Elige uno 🎮', 'Me encanta jugar contigo 🎯', '¿Cual prefieres? ✨'],
+            'nombre': ['¡Soy Pou, tu mascota! 💜', 'Me llamo Pou ✨', '¡Soy Pou! Tu compañero gamer 🎮'],
+            'puki': ['¡Soy mascota de Puki! 💜', 'Puki es increíble 🎮', '¡Bienvenido a Puki! 🌟'],
+            'hola pou': ['¡Hola! 👋😊', '¡Me encanta que me saludes! 💜', 'Hola amiguito 😄'],
+            'ayuda': ['Puedo ayudarte a encontrar juegos 🎮', '¿Necesitas algo? Estoy aquí 💜', 'Soy tu compañero, ¡pregunta! 🌟'],
+            'default': ['¡Eso es genial! 😄', '¡Me encanta! 💜', '¡Verdad! 🌟', '¡Totalmente de acuerdo! 🎯', '¡Jajaja! 😄']
+        };
+
+        const mensajosIniciales = [
+            '¡Hola! Soy Pou 👋',
+            '¿Quieres jugar? 🎮',
+            '¡Bienvenido a Puki! 💜',
+            '¡Hablemos! 💬',
+            '¡Muéveme donde quieras! 🎯'
+        ];
+
+        const keys = {};
+        window.addEventListener('keydown', e => keys[e.key] = true);
+        window.addEventListener('keyup', e => keys[e.key] = false);
+    </script>
+</body>
+</html>
